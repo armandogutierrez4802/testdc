@@ -2,6 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+/// <summary>
+/// Handles binary file upload and download.
+/// Files are stored in memory for the lifetime of the process.
+/// Endpoints: GET api/files, GET api/files/{name}, POST api/files
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class FilesController : ControllerBase
@@ -20,10 +25,10 @@ public class FilesController : ControllerBase
     [HttpGet("{name}")]
     public IActionResult Download(string name)
     {
-        if (!_store.ContainsKey(name))
+        if (!_store.TryGetValue(name, out var bytes))
             return NotFound(new { error = $"File '{name}' not found." });
 
-        return File(_store[name], "application/octet-stream", name);
+        return File(bytes, "application/octet-stream", name);
     }
 
     // POST api/files — upload a file
